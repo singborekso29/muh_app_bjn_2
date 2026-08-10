@@ -7,27 +7,8 @@ use App\Http\Controllers\Master\SiswaController;
 use App\Http\Controllers\Master\TahunPelajaranController;
 use App\Http\Controllers\Master\MataPelajaranController;
 use App\Http\Controllers\Master\KelasController;
-use App\Http\Controllers\Akademik\PembagianSiswaController;
 
 
-Route::prefix('akademik')->group(function () {
-
-    Route::get(
-        '/pembagian-siswa',
-        [PembagianSiswaController::class,'index']
-    )->name('pembagian-siswa.index');
-
-    Route::get(
-        '/pembagian-siswa/load',
-        [PembagianSiswaController::class,'loadData']
-    )->name('pembagian-siswa.load');
-
-    Route::post(
-        '/pembagian-siswa/store',
-        [PembagianSiswaController::class,'store']
-    )->name('pembagian-siswa.store');
-
-});
 
 Route::middleware('role:admin')->group(function () {
 

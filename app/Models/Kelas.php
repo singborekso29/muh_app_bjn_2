@@ -33,9 +33,4 @@ class Kelas extends Model
     {
         return $this->belongsTo(TahunPelajaran::class, 'tahun_pelajaran_id');
     }
-
-    public function kelasSiswa()
-{
-    return $this->hasMany(KelasSiswa::class);
-}
 }

@@ -73,12 +73,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item mb-2">
-                    <a href="{{ route('pembagian-siswa.index') }}" class="nav-link text-white">
-                        <i class="fas fa-school"></i> Pembagian Siswa
-                    </a>
-                </li>
-
                 <!-- PENILAIAN -->
                 <li class="nav-header text-uppercase text-secondary mt-3 mb-2" style="font-size: 12px;">
                     <i class="fas fa-clipboard-check"></i> PENILAIAN

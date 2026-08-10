@@ -15,7 +15,7 @@
 </head>
 <body>
     <div class="header">
-        <h2>Form 8355 </h2>
+        <h2>Laporan Data Siswa/i</h2>
         <p>Dicetak: {{ date('d-m-Y H:i:s') }}</p>
     </div>
     

@@ -18,10 +18,5 @@ class TahunPelajaran extends Model
         'tanggal_selesai' => 'date',
         'is_active' => 'boolean',
     ];
-
-    public function kelasSiswa()
-{
-    return $this->hasMany(KelasSiswa::class);
-}
     
 }

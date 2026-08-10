@@ -5,26 +5,37 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class MataPelajaranController extends Controller
 {
-    // Menampilkan semua data mata pelajaran
+    // Menampilkan semua data mata pelajaran (server-side DataTables)
     public function index(Request $request)
     {
-        $search = $request->search;
+        if ($request->ajax()) {
+            $query = MataPelajaran::query();
 
-        $mataPelajaran = MataPelajaran::when($search, function ($query) use ($search) {
-            $query->where('nama_mapel', 'like', "%{$search}%")
-                  ->orWhere('kode_mapel', 'like', "%{$search}%")
-                  ->orWhere('kelompok', 'like', "%{$search}%");
-        })
-        ->orderBy('nama_mapel')
-        ->paginate(10)
-        ->withQueryString();
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('status', function ($item) {
+                    return $item->is_active
+                        ? '<span class="badge bg-success">Aktif</span>'
+                        : '<span class="badge bg-secondary">Tidak Aktif</span>';
+                })
+                ->addColumn('aksi', function ($item) {
+                    $btn = '';
+                    if (auth()->user()->role == 'admin') {
+                        $btn .= '<a href="' . route('mata-pelajaran.edit', $item->id) . '" class="btn btn-warning btn-sm">Edit</a> ';
+                        $btn .= '<button type="button" class="btn btn-danger btn-sm btn-hapus-mapel" data-id="' . $item->id . '" data-nama="' . e($item->nama_mapel) . '">Hapus</button>';
+                    }
+                    return $btn;
+                })
+                ->rawColumns(['status', 'aksi'])
+                ->make(true);
+        }
 
-        return view('mata-pelajaran.index', compact('mataPelajaran'));
+        return view('mata-pelajaran.index');
     }
-
     // Menampilkan form tambah mata pelajaran
     public function create()
     {

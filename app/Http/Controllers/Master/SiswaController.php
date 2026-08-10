@@ -6,46 +6,40 @@ use App\Http\Controllers\Controller;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Yajra\DataTables\Facades\DataTables;
 
 class SiswaController extends Controller
 {
-    // Menampilkan semua data siswa
+    // Menampilkan halaman data siswa (server-side DataTables)
     public function index(Request $request)
-{
-    $query = Siswa::query();
+    {
+        if ($request->ajax()) {
+            $query = Siswa::query();
 
-    if ($request->filled('search')) {
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('foto', function ($item) {
+                    if ($item->foto && file_exists(public_path('foto_siswa/' . $item->foto))) {
+                        return '<img src="' . asset('foto_siswa/' . $item->foto) . '" width="45" height="45" style="object-fit:cover;border-radius:50%;">';
+                    }
+                    return '<i class="fas fa-user-circle" style="font-size:35px;color:#ccc;"></i>';
+                })
+                ->addColumn('aksi', function ($item) {
+                    $btn = '<a href="' . route('siswa.show-siswa', $item->id) . '" class="btn btn-info btn-sm text-white">Detail</a> ';
+                    $btn .= '<a href="' . route('siswa.cetak-pdf', $item->id) . '" class="btn btn-danger btn-sm" target="_blank">PDF</a> ';
 
-        $search = $request->search;
+                    if (auth()->user()->role == 'admin') {
+                        $btn .= '<a href="' . route('siswa.edit', $item->id) . '" class="btn btn-warning btn-sm text-white">Edit</a> ';
+                        $btn .= '<button type="button" class="btn btn-danger btn-sm btn-hapus-siswa" data-id="' . $item->id . '" data-nama="' . e($item->nama) . '">Hapus</button>';
+                    }
 
-        $query->where(function ($q) use ($search) {
-
-            $q->where('nama', 'like', "%{$search}%")
-              ->orWhere('nisn', 'like', "%{$search}%")
-              ->orWhere('nik', 'like', "%{$search}%")
-              ->orWhere('jenis_kelamin', 'like', "%{$search}%");
-
-        });
-
-    }
-
-    $siswa = $query
-                ->orderBy('nama')
-                ->paginate(10)
-                ->withQueryString();
-        
-        // Jika role siswa, tampilkan view khusus siswa
-        if (auth()->user()->role == 'siswa') {
-            return view('siswa.index', compact('siswa'));
+                    return $btn;
+                })
+                ->rawColumns(['foto', 'aksi'])
+                ->make(true);
         }
-        
-        // Jika role guru, tampilkan view khusus guru
-        if (auth()->user()->role == 'guru') {
-            return view('siswa.index', compact('siswa'));
-        }
-        
-        // Untuk admin, tampilkan view dengan semua tombol
-        return view('siswa.index', compact('siswa'));
+
+        return view('siswa.index');
     }
 
     // Menampilkan form tambah siswa
