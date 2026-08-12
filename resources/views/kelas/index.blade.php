@@ -44,8 +44,8 @@
                 <tr>
                     <th>No</th>
                     <th>Nama Kelas</th>
-                    <th>Tingkat</th>
-                    <th>Kapasitas</th>
+                    <th>Kelas</th>
+                                     <th>Kapasitas</th>
                     <th>Wali Kelas</th>
                     <th>Aksi</th>
                 </tr>
@@ -55,7 +55,8 @@
                 <tr>
                     <td>{{ $loop->iteration + ($kelas->currentPage() - 1) * $kelas->perPage() }}</td>
                     <td><strong>{{ $item->nama_kelas }}</strong></td>
-                    <td>{{ $item->tingkat }}</td>
+                    <td>{{ $item->jurusan }}</td>
+                    
                     <td>{{ $item->kapasitas }}</td>
                    
                     <td>

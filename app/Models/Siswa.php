@@ -15,6 +15,7 @@ class Siswa extends Model
         'nama',
         'tempat_lahir',
         'tanggal_lahir',
+        'nis',
         'nisn',
         'nik',
         'kelas',
@@ -31,12 +32,29 @@ class Siswa extends Model
         'no_ijazah',
         'alamat',
         'foto',
-        'user_id'  // ← TAMBAHKAN INI
+        'user_id',
     ];
 
-    // Relasi ke User
-    public function user()
+        public function kelasSiswa()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(
+            KelasSiswa::class,
+            'siswa_id'
+        );
+    }
+
+    public function kelas()
+    {
+        return $this->belongsToMany(
+            Kelas::class,
+            'kelas_siswa',
+            'siswa_id',
+            'kelas_id'
+        )
+        ->withPivot([
+            'tahun_pelajaran_id',
+            'status',
+        ])
+        ->withTimestamps();
     }
 }

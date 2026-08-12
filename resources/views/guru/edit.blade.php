@@ -16,14 +16,13 @@
         </div>
     @endif
 
-    @include('dashboard.components.search',[
-'action'=>route('guru.index'),
-'placeholder'=>'Cari guru...'
-])
-        @csrf
-        @method('PUT')
+    <form action="{{ route('guru.update', $guru->id) }}"
+      method="POST"
+      enctype="multipart/form-data">
+    @csrf
+    @method('PUT')  
 
-        <div class="row">
+           <div class="row">
             <!-- Kolom Kiri -->
             <div class="col-md-6">
                 <div class="mb-3">

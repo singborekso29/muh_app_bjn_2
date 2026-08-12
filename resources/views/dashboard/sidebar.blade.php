@@ -61,6 +61,17 @@
                     </a>
                 </li>
 
+                <li class="nav-item mb-2">
+                    <a href="{{ route('pembagian-kelas.index') }}" class="nav-link text-white">
+                        <i class="fas fa-users"></i> Pembagian Kelas
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ route('pembagian-kelas.rekap') }}" class="nav-link text-white">
+                        <i class="fas fa-list-check"></i> Rekap Siswa per Kelas
+                    </a>
+                </li>
+
                 <!-- AKADEMIK -->
                 <li class="nav-header text-uppercase text-secondary mt-3 mb-2" style="font-size: 12px;">
                     <i class="fas fa-graduation-cap"></i> AKADEMIK

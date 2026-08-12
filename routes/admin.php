@@ -7,6 +7,7 @@ use App\Http\Controllers\Master\SiswaController;
 use App\Http\Controllers\Master\TahunPelajaranController;
 use App\Http\Controllers\Master\MataPelajaranController;
 use App\Http\Controllers\Master\KelasController;
+use App\Http\Controllers\Master\PembagianKelasController;
 
 
 
@@ -25,8 +26,12 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/kelas/{id}/edit', [KelasController::class, 'edit'])->name('kelas.edit');
     Route::put('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
     Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
-    
-    
+    // PEMBAGIAN KELAS (assign siswa ke kelas)
+    Route::get('/pembagian-kelas', [PembagianKelasController::class, 'index'])->name('pembagian-kelas.index');
+    Route::post('/pembagian-kelas', [PembagianKelasController::class, 'tambahKeKelas'])->name('pembagian-kelas.tambah');
+    Route::delete('/pembagian-kelas/{siswaId}', [PembagianKelasController::class, 'keluarkanDariKelas'])->name('pembagian-kelas.keluarkan');
+    Route::get('/pembagian-kelas/rekap', [PembagianKelasController::class, 'rekap'])->name('pembagian-kelas.rekap');
+
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');

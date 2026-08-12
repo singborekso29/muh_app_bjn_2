@@ -2,38 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KelasSiswa extends Model
 {
+    use HasFactory;
 
-    protected $table='kelas_siswa';
+    protected $table = 'kelas_siswa';
 
-    protected $fillable=[
-
-        'kelas_id',
-
+    protected $fillable = [
         'siswa_id',
-
-        'tahun_pelajarans_id',
-
-        'status'
-
+        'kelas_id',
+        'tahun_pelajaran_id',
+        'status',
     ];
 
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(
+            Siswa::class,
+            'siswa_id'
+        );
     }
 
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class);
+        return $this->belongsTo(
+            Kelas::class,
+            'kelas_id'
+        );
     }
 
-    public function tahun()
+    public function tahunPelajaran()
     {
-        return $this->belongsTo(TahunPelajaran::class,'tahun_pelajarans_id');
+        return $this->belongsTo(
+            TahunPelajaran::class,
+            'tahun_pelajaran_id'
+        );
     }
-
 }

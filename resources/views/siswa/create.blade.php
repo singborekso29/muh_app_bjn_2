@@ -84,6 +84,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
 
                 <div class="mb-3">
                     <label>Jenis Kelamin <span class="text-danger">*</span></label>

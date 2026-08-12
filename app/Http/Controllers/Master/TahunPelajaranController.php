@@ -10,7 +10,7 @@ class TahunPelajaranController extends Controller
 {
     public function index()
     {
-        $tahunPelajaran = TahunPelajaran::latest()->paginate(10);
+        $tahunPelajaran = TahunPelajaran::orderBy('tahun', 'desc')->paginate(10);
 
         return view('tahun-pelajaran.index', compact('tahunPelajaran'));
     }
@@ -23,72 +23,66 @@ class TahunPelajaranController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tahun' => 'required',
-            'semester' => 'required',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
-            'is_active' => 'required'
+            'tahun' => 'required|string|max:20',
+            'semester' => 'required|in:Ganjil,Genap',
+            'tanggal_mulai' => 'nullable|date',
+            'tanggal_selesai' => 'nullable|date',
+            'is_active' => 'nullable|boolean',
         ]);
-
-        if ($request->is_active == 1) {
-            TahunPelajaran::query()->update([
-                'is_active' => 0
-            ]);
-        }
 
         TahunPelajaran::create([
             'tahun' => $request->tahun,
             'semester' => $request->semester,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
-            'is_active' => $request->is_active,
+            'is_active' => $request->boolean('is_active'),
         ]);
 
         return redirect()
             ->route('tahun-pelajaran.index')
-            ->with('success', 'Tahun Pelajaran berhasil ditambahkan.');
+            ->with('success', 'Tahun pelajaran berhasil ditambahkan.');
     }
 
-    public function edit(TahunPelajaran $tahun_pelajaran)
+    public function edit($id)
     {
-        return view('tahun-pelajaran.edit', compact('tahun_pelajaran'));
+        $tahunPelajaran = TahunPelajaran::findOrFail($id);
+
+        return view('tahun-pelajaran.edit', compact('tahunPelajaran'));
     }
 
-    public function update(Request $request, TahunPelajaran $tahun_pelajaran)
+    public function update(Request $request, $id)
     {
+        $tahunPelajaran = TahunPelajaran::findOrFail($id);
+
         $request->validate([
-            'tahun' => 'required',
-            'semester' => 'required',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
-            'is_active' => 'required'
+            'tahun' => 'required|string|max:20',
+            'semester' => 'required|in:Ganjil,Genap',
+            'tanggal_mulai' => 'nullable|date',
+            'tanggal_selesai' => 'nullable|date',
+            'is_active' => 'nullable|boolean',
         ]);
 
-        if ($request->is_active == 1) {
-            TahunPelajaran::query()->update([
-                'is_active' => 0
-            ]);
-        }
-
-        $tahun_pelajaran->update([
+        $tahunPelajaran->update([
             'tahun' => $request->tahun,
             'semester' => $request->semester,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
-            'is_active' => $request->is_active,
+            'is_active' => $request->boolean('is_active'),
         ]);
 
         return redirect()
             ->route('tahun-pelajaran.index')
-            ->with('success', 'Data berhasil diubah.');
+            ->with('success', 'Tahun pelajaran berhasil diperbarui.');
     }
 
-    public function destroy(TahunPelajaran $tahun_pelajaran)
+    public function destroy($id)
     {
-        $tahun_pelajaran->delete();
+        $tahunPelajaran = TahunPelajaran::findOrFail($id);
+
+        $tahunPelajaran->delete();
 
         return redirect()
             ->route('tahun-pelajaran.index')
-            ->with('success', 'Data berhasil dihapus.');
+            ->with('success', 'Tahun pelajaran berhasil dihapus.');
     }
 }
