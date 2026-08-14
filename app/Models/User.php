@@ -16,15 +16,16 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-    'name',
-    'username',
-    'email',
-    'password',
-    'role',
-    'is_active',
-    'last_login_at',
-];
-
+        'name',
+        'username',
+        'email',
+        'password',
+        'role',
+        'is_active',
+        'last_login_at',
+        'qr_code',      // ← TAMBAHKAN UNTUK QR CODE
+        'card_uid'      // ← TAMBAHKAN UNTUK RFID
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -42,21 +43,45 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     protected function casts(): array
-{
-    return [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'last_login_at' => 'datetime',
-    ];
-}
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'last_login_at' => 'datetime',
+        ];
+    }
+
+    // ============================================
+    // RELASI
+    // ============================================
 
     /**
-     * Relasi ke Siswa
+     * Relasi ke Siswa (One-to-One)
      */
     public function siswa()
     {
-        return $this->hasOne(Siswa::class);
+        return $this->hasOne(Siswa::class, 'user_id');
     }
+
+    /**
+     * Relasi ke Guru (One-to-One)
+     */
+    public function guru()
+    {
+        return $this->hasOne(Guru::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke Absensi (One-to-Many)
+     */
+    public function absensi()
+    {
+        return $this->hasMany(Absensi::class, 'user_id');
+    }
+
+    // ============================================
+    // CEK ROLE
+    // ============================================
 
     /**
      * Cek apakah user adalah admin
@@ -83,6 +108,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Cek apakah user adalah karyawan
+     */
+    public function isKaryawan(): bool
+    {
+        return $this->role === 'karyawan';
+    }
+
+    /**
      * Cek apakah user memiliki role tertentu
      */
     public function hasRole(string $role): bool
@@ -90,10 +123,69 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
-    public function guru()
-{
-    return $this->hasOne(Guru::class);
-}
+    // ============================================
+    // ACCESSOR & MUTATOR
+    // ============================================
 
+    /**
+     * Get role label
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        $labels = [
+            'admin' => 'Administrator',
+            'guru' => 'Guru',
+            'siswa' => 'Siswa',
+            'karyawan' => 'Karyawan'
+        ];
 
+        return $labels[$this->role] ?? $this->role;
+    }
+
+    /**
+     * Get status badge
+     */
+    public function getStatusBadgeAttribute(): string
+    {
+        if ($this->is_active) {
+            return '<span class="badge bg-success">Aktif</span>';
+        }
+        return '<span class="badge bg-danger">Tidak Aktif</span>';
+    }
+
+    /**
+     * Get nama lengkap dengan role
+     */
+    public function getNamaWithRoleAttribute(): string
+    {
+        return $this->name . ' (' . $this->role_label . ')';
+    }
+
+    // ============================================
+    // SCOPE
+    // ============================================
+
+    /**
+     * Scope untuk user aktif
+     */
+    public function scopeAktif($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope untuk user tidak aktif
+     */
+    public function scopeTidakAktif($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    /**
+     * Scope untuk filter berdasarkan role
+     */
+    public function scopeByRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
 }

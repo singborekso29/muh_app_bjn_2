@@ -1,129 +1,59 @@
 @extends('dashboard.layout')
 
 @section('content')
-
 <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1></i> Jadwal Pelajaran</h1>
+        <a href="{{ route('jadwal.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Tambah Jadwal
+        </a>
+    </div>
 
-<div class="d-flex justify-content-between mb-3">
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-<h3>Data Mata Pelajaran</h3>
-
-<a href="{{ route('mata-pelajaran.create') }}"
-class="btn btn-primary">
-
-Tambah Mata Pelajaran
-
-</a>
-
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>No</th>
+                    <th>Kelas</th>
+                    <th>Mata Pelajaran</th>
+                    <th>Guru</th>
+                    <th>Hari</th>
+                    <th>Jam</th>
+                    <th>Ruangan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($jadwal as $item)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $item->kelas ? $item->kelas->nama_kelas : '-' }}</td>
+                    <td>{{ $item->mataPelajaran ? $item->mataPelajaran->nama : '-' }}</td>
+                    <td>{{ $item->guru ? $item->guru->nama : '-' }}</td>
+                    <td>{{ $item->hari }}</td>
+                    <td>{{ $item->jam_mulai }} - {{ $item->jam_selesai }}</td>
+                    <td>{{ $item->ruangan ?? '-' }}</td>
+                    <td>
+                        <a href="{{ route('jadwal.show', $item->id) }}" class="btn btn-info btn-sm">Detail</a>
+                        <a href="{{ route('jadwal.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <form action="{{ route('jadwal.destroy', $item->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin?')">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center">Belum ada data jadwal</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
-
-@if(session('success'))
-
-<div class="alert alert-success">
-
-{{ session('success') }}
-
-</div>
-
-@endif
-
-<div class="card">
-
-<div class="card-body">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-dark">
-
-<tr>
-
-<th width="60">No</th>
-
-<th>Kode</th>
-
-<th>Nama Mata Pelajaran</th>
-
-<th>Kelompok</th>
-
-<th width="170">Aksi</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-@forelse($mataPelajaran as $item)
-
-<tr>
-
-<td>
-
-{{ $loop->iteration + ($mataPelajaran->currentPage()-1) * $mataPelajaran->perPage() }}
-
-</td>
-
-<td>{{ $item->kode }}</td>
-
-<td>{{ $item->nama }}</td>
-
-<td>{{ $item->kelompok }}</td>
-
-<td>
-
-<a href="{{ route('mata-pelajaran.edit',$item->id) }}"
-class="btn btn-warning btn-sm">
-
-Edit
-
-</a>
-
-<form
-action="{{ route('mata-pelajaran.destroy',$item->id) }}"
-method="POST"
-class="d-inline">
-
-@csrf
-@method('DELETE')
-
-<button
-onclick="return confirm('Hapus data?')"
-class="btn btn-danger btn-sm">
-
-Hapus
-
-</button>
-
-</form>
-
-</td>
-
-</tr>
-
-@empty
-
-<tr>
-
-<td colspan="5" class="text-center">
-
-Belum ada data
-
-</td>
-
-</tr>
-
-@endforelse
-
-</tbody>
-
-</table>
-
-{{ $mataPelajaran->links() }}
-
-</div>
-
-</div>
-
-</div>
-
 @endsection

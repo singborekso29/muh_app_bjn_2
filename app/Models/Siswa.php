@@ -33,14 +33,20 @@ class Siswa extends Model
         'alamat',
         'foto',
         'user_id',
+        'kelas_id',
+        'status_pembagian'
     ];
 
-        public function kelasSiswa()
+    // Relasi ke User
+    public function user()
     {
-        return $this->hasMany(
-            KelasSiswa::class,
-            'siswa_id'
-        );
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Relasi ke Kelas (Many-to-Many via tabel kelas_siswa)
+    public function kelasSiswa()
+    {
+        return $this->hasMany(KelasSiswa::class, 'siswa_id');
     }
 
     public function kelas()
@@ -56,5 +62,38 @@ class Siswa extends Model
             'status',
         ])
         ->withTimestamps();
+    }
+
+    // Relasi ke Absensi (via user_id)
+    public function absensi()
+    {
+        return $this->hasMany(Absensi::class, 'user_id', 'user_id');
+    }
+
+    // Relasi ke Kelas (langsung via kelas_id - untuk siswa yang sudah punya kelas tetap)
+    public function kelasSekarang()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
+
+    // Accessor untuk menampilkan nama lengkap dengan kelas
+    public function getNamaLengkapAttribute()
+    {
+        $kelas = $this->kelasSekarang ? $this->kelasSekarang->nama_kelas : 'Belum Ada Kelas';
+        return $this->nama . ' - ' . $kelas;
+    }
+
+    // Scope untuk filter berdasarkan kelas
+    public function scopeByKelas($query, $kelasId)
+    {
+        return $query->where('kelas_id', $kelasId);
+    }
+
+    // Scope untuk filter berdasarkan tingkat
+    public function scopeByTingkat($query, $tingkat)
+    {
+        return $query->whereHas('kelasSekarang', function ($q) use ($tingkat) {
+            $q->where('tingkat', $tingkat);
+        });
     }
 }

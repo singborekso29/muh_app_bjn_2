@@ -5,7 +5,7 @@
 <div class="container">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3><i class="fas fa-list-check text-primary"></i> Rekap Siswa per Kelas</h3>
+        <h3>Rekap Siswa per Kelas</h3>
         <a href="{{ route('pembagian-kelas.index') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-arrow-right"></i> Ke Halaman Pembagian Kelas
         </a>
@@ -61,7 +61,7 @@
                 <h2 class="accordion-header">
                     <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button"
                             data-bs-toggle="collapse" data-bs-target="#kelas-{{ $kelas->id }}">
-                        <strong>{{ $kelas->nama_kelas }}</strong>&nbsp;({{ $kelas->tingkat }})
+                        <strong>{{ $kelas->nama_kelas }}</strong>&nbsp;({{ $kelas->jurusan }})
                         <span class="badge bg-secondary ms-2">{{ $kelas->siswa->count() }} siswa</span>
                     </button>
                 </h2>

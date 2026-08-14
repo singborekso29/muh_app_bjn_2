@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Siswa;
+use App\Models\Absensi;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
@@ -25,7 +26,7 @@ class SiswaController extends Controller
                     return '<i class="fas fa-user-circle" style="font-size:35px;color:#ccc;"></i>';
                 })
                 ->addColumn('aksi', function ($item) {
-                    $btn = '<a href="' . route('siswa.show-siswa', $item->id) . '" class="btn btn-info btn-sm text-white">Detail</a> ';
+                    $btn = '<a href="' . route('siswa.show', $item->id) . '" class="btn btn-info btn-sm text-white">Detail</a> ';
                     $btn .= '<a href="' . route('siswa.cetak-pdf', $item->id) . '" class="btn btn-danger btn-sm" target="_blank">PDF</a> ';
 
                     if (auth()->user()->role == 'admin') {
@@ -45,7 +46,6 @@ class SiswaController extends Controller
     // Menampilkan form tambah siswa
     public function create()
     {
-        // Hanya admin yang bisa tambah
         if (auth()->user()->role != 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk menambah data!');
         }
@@ -56,7 +56,6 @@ class SiswaController extends Controller
     // Menyimpan data siswa baru
     public function store(Request $request)
     {
-        // Hanya admin yang bisa menyimpan
         if (auth()->user()->role != 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk menambah data!');
         }
@@ -115,26 +114,22 @@ class SiswaController extends Controller
         return redirect('/siswa')->with('success', 'Data siswa berhasil ditambahkan!');
     }
 
-    // Menampilkan detail siswa (untuk admin dan guru)
+    // Menampilkan detail siswa
     public function show($id)
     {
         $siswa = Siswa::findOrFail($id);
         
-        // Jika role siswa, tampilkan view khusus siswa
         if (auth()->user()->role == 'siswa') {
             return view('siswa.show-siswa', compact('siswa'));
         }
         
-        // Jika role guru, tampilkan view khusus guru
         if (auth()->user()->role == 'guru') {
             return view('siswa.show-siswa', compact('siswa'));
         }
         
-        // Untuk admin, tampilkan view dengan semua tombol
         return view('siswa.show-siswa', compact('siswa'));
     }
 
-    // Menampilkan detail siswa untuk role siswa (khusus)
     public function showSiswa($id)
     {
         $siswa = Siswa::findOrFail($id);
@@ -144,7 +139,6 @@ class SiswaController extends Controller
     // Menampilkan form edit siswa
     public function edit($id)
     {
-        // Hanya admin yang bisa edit
         if (auth()->user()->role != 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk mengedit data!');
         }
@@ -156,7 +150,6 @@ class SiswaController extends Controller
     // Mengupdate data siswa
     public function update(Request $request, $id)
     {
-        // Hanya admin yang bisa update
         if (auth()->user()->role != 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk mengupdate data!');
         }
@@ -206,7 +199,6 @@ class SiswaController extends Controller
     // Menghapus data siswa
     public function destroy($id)
     {
-        // Hanya admin yang bisa hapus
         if (auth()->user()->role != 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk menghapus data!');
         }
@@ -222,13 +214,16 @@ class SiswaController extends Controller
         return redirect('/siswa')->with('success', 'Data siswa berhasil dihapus!');
     }
 
-    // Menampilkan profil siswa yang sedang login
+    // ============================================
+    // PROFILE SISWA (HANYA 1 METHOD)
+    // ============================================
     public function profile()
     {
-        $siswa = Siswa::where('user_id', auth()->id())->first();
+        $user = auth()->user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
         
         if (!$siswa) {
-            $siswa = Siswa::where('nama', auth()->user()->name)->first();
+            $siswa = Siswa::where('nama', $user->name)->first();
         }
         
         if (!$siswa) {
@@ -238,13 +233,16 @@ class SiswaController extends Controller
         return view('siswa.profile', compact('siswa'));
     }
 
-    // Cetak PDF profil siswa
+    // ============================================
+    // CETAK PROFILE PDF (HANYA 1 METHOD)
+    // ============================================
     public function cetakProfilePDF()
     {
-        $siswa = Siswa::where('user_id', auth()->id())->first();
+        $user = auth()->user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
         
         if (!$siswa) {
-            $siswa = Siswa::where('nama', auth()->user()->name)->first();
+            $siswa = Siswa::where('nama', $user->name)->first();
         }
         
         if (!$siswa) {
@@ -256,10 +254,15 @@ class SiswaController extends Controller
         return $pdf->stream('profil-siswa-'.$siswa->nama.'.pdf');
     }
 
-    // Cetak PDF semua data siswa (hanya admin)
+    // ============================================
+    // Cetak PDF semua data siswa (hanya admin dan guru)
+    // ============================================
+    
+
     public function cetakSemuaPDF()
     {
-        if (auth()->user()->role != 'admin') {
+        // Hanya admin dan guru yang bisa cetak semua
+        if (auth()->user()->role != 'admin' && auth()->user()->role != 'guru') {
             abort(403, 'Anda tidak memiliki akses!');
         }
         
@@ -268,14 +271,49 @@ class SiswaController extends Controller
         $pdf->setPaper('A4', 'landscape');
         return $pdf->stream('semua-data-siswa.pdf');
     }
-
-    // Cetak PDF satu siswa
     public function cetakPDF($id)
-    {
-        $siswa = Siswa::findOrFail($id);
-        
-        $pdf = Pdf::loadView('siswa.cetak-pdf', compact('siswa'));
-        $pdf->setPaper('A4', 'portrait');
-        return $pdf->stream('data-siswa-'.$siswa->nama.'.pdf');
+{
+    $siswa = Siswa::findOrFail($id);
+
+    $fotoBase64 = null;
+
+    if ($siswa->foto) {
+        $fotoPath = public_path('foto_siswa/' . $siswa->foto);
+
+        if (file_exists($fotoPath)) {
+            $fotoBase64 = 'data:image/' .
+                strtolower(pathinfo($fotoPath, PATHINFO_EXTENSION)) .
+                ';base64,' .
+                base64_encode(file_get_contents($fotoPath));
+        }
     }
+
+    $pdf = Pdf::setOption([
+        'isRemoteEnabled' => false,
+        'isHtml5ParserEnabled' => true,
+        'isPhpEnabled' => false,
+        'dpi' => 96,
+        'defaultFont' => 'Arial',
+    ])->loadView('siswa.cetak-pdf', [
+        'siswa' => $siswa,
+        'fotoBase64' => $fotoBase64,
+    ]);
+
+    $pdf->setPaper('A4', 'portrait');
+
+    return $pdf->stream(
+        'data-siswa-' . preg_replace('/[^A-Za-z0-9\-]/', '-', $siswa->nama) . '.pdf'
+    );
+}
+
+    // Dashboard siswa
+public function dashboard()
+{
+    $user = auth()->user();
+    $myAbsensi = Absensi::where('user_id', $user->id)
+        ->where('tanggal', date('Y-m-d'))
+        ->first();
+
+    return view('dashboard.siswa', compact('myAbsensi'));
+}
 }

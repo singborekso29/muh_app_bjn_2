@@ -22,13 +22,14 @@
     </div>
 
     <div class="foto">
-        @if($siswa->foto && file_exists(public_path('foto_siswa/' . $siswa->foto)))
-            <img src="{{ public_path('foto_siswa/' . $siswa->foto) }}" alt="Foto {{ $siswa->nama }}">
-        @else
-            <div style="width:300px;height:300px;border-radius:0%;border:2px solid #000;margin:0 auto;display:flex;align-items:center;justify-content:center;background:#f2f2f2;">
-                <span style="font-size:50px;color:#999;">?</span>
-            </div>
-        @endif
+        @if($fotoBase64)
+    <img src="{{ $fotoBase64 }}"
+         style="width:120px; height:150px; object-fit:cover;">
+@else
+    <div style="width:120px; height:150px; border:1px solid #ccc; text-align:center; padding-top:50px;">
+        Foto
+    </div>
+@endif
     </div>
 
     <table class="table">

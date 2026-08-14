@@ -2,24 +2,24 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Master\GuruController;
+use App\Http\Controllers\Master\TapAbsensiController;
 
-Route::middleware('role:admin,guru')->group(function () {
+// ============================================
+// ROUTE UNTUK GURU (role:guru)
+// ============================================
+Route::middleware(['auth', 'role:guru'])->group(function () {
 
-    Route::get('/guru', [GuruController::class, 'index'])->name('guru.index');
+    // Dashboard guru
+    Route::get('/dashboard-guru', function () {
+        return view('dashboard.guru');
+    })->name('guru.dashboard');
 
-    Route::get('/guru/cetak-semua-pdf', [GuruController::class, 'cetakSemuaPDF'])
-        ->name('guru.cetak-semua');
+    // Profile guru
+    Route::get('/profile-guru', [GuruController::class, 'profile'])->name('guru.profile');
 
-    Route::get('/guru/{id}/download-berkas', [GuruController::class, 'downloadBerkas'])
-        ->whereNumber('id')
-        ->name('guru.download-berkas');
-
-    Route::get('/guru/{id}/cetak-pdf', [GuruController::class, 'cetakPDF'])
-        ->whereNumber('id')
-        ->name('guru.cetak-pdf');
-
-    Route::get('/guru/{id}', [GuruController::class, 'show'])
-        ->whereNumber('id')
-        ->name('guru.show');
-
+    // TAP ABSENSI
+Route::prefix('tap')->group(function () {
+    Route::get('/', [TapAbsensiController::class, 'index'])->name('tap.index');
+    Route::post('/tap', [TapAbsensiController::class, 'tap'])->name('tap.process');
+});
 });

@@ -30,6 +30,21 @@
                             @endif
                         </div>
 
+                        <!-- ============================================ -->
+                            <!-- QR CODE - LETAKKAN DI SINI (DI BAWAH FOTO) -->
+                            <!-- ============================================ -->
+                            @if(auth()->user()->qr_code)
+                                <div class="text-center mt-3">
+                                    <h6><i class="fas fa-qrcode"></i> QR Code Absensi</h6>
+                                    <img src="data:image/png;base64,{{ base64_encode(QrCode::size(200)->generate(auth()->user()->qr_code)) }}" 
+                                         alt="QR Code" 
+                                         class="img-fluid"
+                                         style="max-width: 150px;">
+                                    <p class="text-muted small">Scan QR Code ini untuk absen</p>
+                                </div>
+                            @endif
+                            <!-- ============================================ -->
+
                         <!-- Data Siswa -->
                         <div class="col-md-8">
                             <h4 class="text-center mb-3">DATA SISWA</h4>

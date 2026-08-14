@@ -2,30 +2,24 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Master\SiswaController;
+use App\Http\Controllers\Master\AbsensiController;
+use App\Http\Controllers\Master\TapAbsensiController;
 
-Route::middleware('role:admin,guru')->group(function () {
+// ============================================
+// ROUTE UNTUK SISWA (role:siswa)
+// ============================================
+Route::middleware(['auth', 'role:siswa'])->group(function () {
 
-    Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');
+    // Dashboard siswa
+    Route::get('/dashboard-siswa', [SiswaController::class, 'dashboard'])->name('siswa.dashboard');
 
-    Route::get('/siswa/cetak-semua-pdf', [SiswaController::class, 'cetakSemuaPDF'])
-        ->name('siswa.cetak-semua');
+    // Profile siswa
+    Route::get('/profile', [SiswaController::class, 'profile'])->name('siswa.profile');
+    Route::get('/profile/cetak-pdf', [SiswaController::class, 'cetakProfilePDF'])->name('siswa.cetak-profile');
 
-    Route::get('/siswa/{id}/cetak-pdf', [SiswaController::class, 'cetakPDF'])
-        ->whereNumber('id')
-        ->name('siswa.cetak-pdf');
-
-    Route::get('/siswa/{id}', [SiswaController::class, 'show'])
-        ->whereNumber('id')
-        ->name('siswa.show-siswa');
-
+    // TAP ABSENSI
+    Route::prefix('tap')->group(function () {
+    Route::get('/', [TapAbsensiController::class, 'index'])->name('tap.index');
+    Route::post('/tap', [TapAbsensiController::class, 'tap'])->name('tap.process');
 });
-
-Route::middleware('role:siswa')->group(function () {
-
-    Route::get('/profile', [SiswaController::class, 'profile'])
-        ->name('siswa.profile');
-
-    Route::get('/profile/cetak-pdf', [SiswaController::class, 'cetakProfilePDF'])
-        ->name('siswa.cetak-profile');
-
 });
