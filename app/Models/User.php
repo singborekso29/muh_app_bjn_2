@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Absensi;
+use App\Models\Siswa;
+use App\Models\Guru;  // ← PERBAIKI IMPORT (HAPUS \Master\)
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -23,8 +27,8 @@ class User extends Authenticatable
         'role',
         'is_active',
         'last_login_at',
-        'qr_code',      // ← TAMBAHKAN UNTUK QR CODE
-        'card_uid'      // ← TAMBAHKAN UNTUK RFID
+        'qr_code',
+        'card_uid'
     ];
 
     /**
@@ -78,6 +82,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Absensi::class, 'user_id');
     }
+
+    // ❌ HAPUS METHOD INI (TIDAK PERLU)
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class);
+    // }
 
     // ============================================
     // CEK ROLE
@@ -187,5 +197,21 @@ class User extends Authenticatable
     public function scopeByRole($query, $role)
     {
         return $query->where('role', $role);
+    }
+
+    // ============================================
+    // QR CODE
+    // ============================================
+
+    /**
+     * Generate QR Code untuk user
+     */
+    public function generateQRCode()
+    {
+        if (!$this->qr_code) {
+            $this->qr_code = $this->id . '-' . $this->email;
+            $this->save();
+        }
+        return $this->qr_code;
     }
 }

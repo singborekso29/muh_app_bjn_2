@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Guru;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class GuruController extends Controller
@@ -108,6 +112,123 @@ class GuruController extends Controller
 
         return redirect('/guru')->with('success', 'Data guru berhasil ditambahkan!');
     }
+
+
+    /**
+ * Membuat akun login untuk guru
+ */
+public function buatAkun($id)
+{
+    // Hanya admin
+    if (auth()->user()->role != 'admin') {
+        abort(403, 'Anda tidak memiliki akses untuk membuat akun guru!');
+    }
+
+    // Ambil data guru
+    $guru = Guru::findOrFail($id);
+
+    // Cek apakah guru sudah mempunyai akun
+    if ($guru->user_id) {
+        return redirect('/guru')
+            ->with('error', 'Guru ' . $guru->nama . ' sudah memiliki akun login.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Buat username dari nama guru
+    |--------------------------------------------------------------------------
+    */
+
+    // Contoh:
+    // "Fernanda Chairunnisa, S.Pd, Gr"
+    // menjadi:
+    // "fernandachairunnisa"
+    $usernameDasar = Str::of($guru->nama)
+        ->lower()
+        ->replaceMatches('/[^a-z0-9]+/', '')
+        ->toString();
+
+    $username = $usernameDasar;
+
+    $counter = 1;
+
+    // Pastikan username unik
+    while (User::where('username', $username)->exists()) {
+
+        $username = $usernameDasar . $counter;
+
+        $counter++;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Buat email otomatis
+    |--------------------------------------------------------------------------
+    */
+
+    $emailDasar = $username . '@sekolah.com';
+
+    $email = $emailDasar;
+
+    $counter = 1;
+
+    // Pastikan email unik
+    while (User::where('email', $email)->exists()) {
+
+        $email = $username . $counter . '@sekolah.com';
+
+        $counter++;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Password sementara
+    |--------------------------------------------------------------------------
+    */
+
+    $passwordSementara = 'Sekolah@123';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Buat User
+    |--------------------------------------------------------------------------
+    */
+
+    $user = User::create([
+        'name' => $guru->nama,
+        'username' => $username,
+        'email' => $email,
+        'password' => Hash::make($passwordSementara),
+        'role' => 'guru',
+        'is_active' => true,
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hubungkan User dengan Guru
+    |--------------------------------------------------------------------------
+    */
+
+    $guru->update([
+        'user_id' => $user->id,
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kembali ke halaman Guru
+    |--------------------------------------------------------------------------
+    */
+
+    return redirect('/guru')->with(
+        'success',
+        'Akun guru berhasil dibuat. ' .
+        'Username: ' . $username .
+        ' | Password sementara: ' . $passwordSementara
+    );
+}
+
+
+
 
     // Menampilkan detail guru
     public function show($id)

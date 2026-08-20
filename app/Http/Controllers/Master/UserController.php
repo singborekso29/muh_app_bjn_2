@@ -6,47 +6,161 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
 {
-    $users = User::query();
+    // Jika request berasal dari DataTables
+    if ($request->ajax()) {
 
-    // Search
-    if ($request->filled('search')) {
+        $query = User::query();
 
-        $search = $request->search;
+        // ==============================
+        // SEARCH DATATABLES
+        // ==============================
+        if ($request->filled('search.value')) {
 
-        $users->where(function ($q) use ($search) {
+            $search = $request->input('search.value');
 
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('username', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
 
-        });
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('role', 'like', "%{$search}%");
+
+            });
+        }
+
+        // ==============================
+        // TOTAL DATA SEBELUM FILTER
+        // ==============================
+        $recordsTotal = User::count();
+
+        // ==============================
+        // TOTAL DATA SETELAH FILTER
+        // ==============================
+        $recordsFiltered = $query->count();
+
+        // ==============================
+        // SORTING
+        // ==============================
+        $columns = [
+            0 => 'id',
+            1 => 'name',
+            2 => 'username',
+            3 => 'email',
+            4 => 'role',
+            5 => 'is_active',
+            6 => 'last_login_at',
+        ];
+
+        $orderColumnIndex = $request->input('order.0.column', 1);
+        $orderDirection = $request->input('order.0.dir', 'asc');
+
+        $orderColumn = $columns[$orderColumnIndex] ?? 'name';
+
+        $query->orderBy($orderColumn, $orderDirection);
+
+        // ==============================
+        // PAGINATION
+        // ==============================
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 10);
+
+        if ($length != -1) {
+            $query->skip($start)->take($length);
+        }
+
+        $users = $query->get();
+
+        // ==============================
+        // FORMAT DATA
+        // ==============================
+        $data = [];
+
+        foreach ($users as $index => $user) {
+
+            // ROLE
+            if ($user->role == 'admin') {
+
+                $role = '<span class="badge bg-danger">Admin</span>';
+
+            } elseif ($user->role == 'guru') {
+
+                $role = '<span class="badge bg-success">Guru</span>';
+
+            } elseif ($user->role == 'siswa') {
+
+                $role = '<span class="badge bg-primary">Siswa</span>';
+
+            } else {
+
+                $role = '<span class="badge bg-secondary">'
+                      . e(ucfirst($user->role))
+                      . '</span>';
+            }
+
+            // STATUS
+            if ($user->is_active) {
+
+                $status = '<span class="badge bg-success">Aktif</span>';
+
+            } else {
+
+                $status = '<span class="badge bg-secondary">Nonaktif</span>';
+            }
+
+            // LOGIN TERAKHIR
+            $lastLogin = $user->last_login_at
+                ? $user->last_login_at->format('d-m-Y H:i')
+                : '<span class="text-muted">Belum pernah login</span>';
+
+            // AKSI
+            $aksi = '';
+
+            $aksi .= '
+                <a href="' . route('users.edit', $user->id) . '"
+                   class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </a>
+            ';
+
+            $aksi .= '
+                <button type="button"
+                        class="btn btn-danger btn-sm btn-hapus-user"
+                        data-id="' . $user->id . '"
+                        data-nama="' . e($user->name) . '">
+                    <i class="fas fa-trash"></i>
+                    Hapus
+                </button>
+            ';
+
+            $data[] = [
+                'DT_RowIndex' => $start + $index + 1,
+                'name' => e($user->name),
+                'username' => e($user->username ?? '-'),
+                'email' => e($user->email ?? '-'),
+                'role' => $role,
+                'status' => $status,
+                'last_login' => $lastLogin,
+                'aksi' => $aksi,
+            ];
+        }
+
+        return response()->json([
+            'draw' => (int) $request->input('draw'),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
-    // Filter Role
-    if ($request->filled('role')) {
-
-        $users->where('role', $request->role);
-
-    }
-
-    // Filter Status
-    if ($request->filled('status')) {
-
-        $users->where('is_active', $request->status);
-
-    }
-
-    $users = $users
-        ->orderBy('name')
-        ->paginate(10)
-        ->withQueryString();
-
-    return view('users.index', compact('users'));
+    // Jika dibuka secara normal
+    return view('users.index');
 }
 
     public function create()

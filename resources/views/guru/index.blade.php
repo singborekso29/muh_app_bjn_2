@@ -34,7 +34,7 @@
             <tbody>
                 @forelse($guru as $item)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $guru->firstItem() + $loop->index }}</td>
                     <td>
                         @if($item->foto && file_exists(public_path('foto_guru/' . $item->foto)))
                             <img src="{{ asset('foto_guru/' . $item->foto) }}" 
@@ -65,6 +65,31 @@
                                 'text'=>'Berkas'
                             ])
                         @endif
+
+                        @if(auth()->user()->role === 'admin')
+                        @if($item->user_id)
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle"></i>
+                                Sudah memiliki akun
+                            </span>
+                        @else
+                            <form action="{{ route('guru.buat-akun', $item->id) }}"
+                                method="POST"
+                                class="d-inline"
+                                onsubmit="return confirm('Buat akun login untuk guru ini?')">
+
+                                @csrf
+
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-user-plus"></i>
+                                    Buat Akun
+                                </button>
+
+                            </form>
+                        @endif
+
+                    @endif
+
 
                         @if(auth()->user()->role == 'admin')
                             @include('dashboard.components.button',[

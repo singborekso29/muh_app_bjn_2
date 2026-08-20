@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Siswa extends Model
 {
@@ -96,4 +98,28 @@ class Siswa extends Model
             $q->where('tingkat', $tingkat);
         });
     }
+
+    public function nilaiMapel(): HasMany
+{
+    return $this->hasMany(
+        NilaiMapel::class,
+        'siswa_id'
+    );
+}
+
+public function capaianKompetensi(): HasMany
+{
+    return $this->hasMany(
+        CapaianKompetensi::class,
+        'siswa_id'
+    );
+}
+
+public function catatanWaliKelas(): HasMany
+{
+    return $this->hasMany(
+        CatatanWaliKelas::class,
+        'siswa_id'
+    );
+}
 }

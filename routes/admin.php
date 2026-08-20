@@ -49,10 +49,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // MATA PELAJARAN
     Route::resource('mata-pelajaran', MataPelajaranController::class);
 
-
     // JADWAL
     Route::resource('jadwal', JadwalPelajaranController::class);
-
 
     // IMPORT SISWA
     Route::get('/siswa/import', [SiswaImportController::class, 'index'])
@@ -65,65 +63,73 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('siswa.import.template');
 
 
-    // ==================================================
-    // GURU - CRUD ADMIN
-    // ==================================================
+        /// ==================================================
+        // GURU - CRUD ADMIN
+        // ==================================================
 
-    Route::get('/guru', [GuruController::class, 'index'])
-        ->name('guru.index');
+        Route::get('/guru', [GuruController::class, 'index'])
+            ->name('guru.index');
 
-    Route::get('/guru/create', [GuruController::class, 'create'])
-        ->name('guru.create');
+        Route::get('/guru/create', [GuruController::class, 'create'])
+            ->name('guru.create');
 
-    Route::post('/guru', [GuruController::class, 'store'])
-        ->name('guru.store');
+        Route::post('/guru', [GuruController::class, 'store'])
+            ->name('guru.store');
 
-    Route::get('/guru/{id}/edit', [GuruController::class, 'edit'])
-        ->whereNumber('id')
-        ->name('guru.edit');
+        // DETAIL GURU
+        Route::get('/guru/{id}', [GuruController::class, 'show'])
+            ->whereNumber('id')
+            ->name('guru.show');
 
-    Route::put('/guru/{id}', [GuruController::class, 'update'])
-        ->whereNumber('id')
-        ->name('guru.update');
+        Route::get('/guru/{id}/edit', [GuruController::class, 'edit'])
+            ->whereNumber('id')
+            ->name('guru.edit');
 
-    Route::delete('/guru/{id}', [GuruController::class, 'destroy'])
-        ->whereNumber('id')
-        ->name('guru.destroy');
+        Route::put('/guru/{id}', [GuruController::class, 'update'])
+            ->whereNumber('id')
+            ->name('guru.update');
 
-    Route::get('/guru/{id}/cetak-pdf', [GuruController::class, 'cetakPDF'])
-        ->whereNumber('id')
-        ->name('guru.cetak-pdf');
+        Route::delete('/guru/{id}', [GuruController::class, 'destroy'])
+            ->whereNumber('id')
+            ->name('guru.destroy');
 
-    Route::get('/guru/cetak-semua-pdf', [GuruController::class, 'cetakSemuaPDF'])
-        ->name('guru.cetak-semua');
+        Route::post('/guru/{id}/buat-akun', [GuruController::class, 'buatAkun'])
+            ->whereNumber('id')
+            ->name('guru.buat-akun');
 
-    Route::get('/guru/{id}/download-berkas', [GuruController::class, 'downloadBerkas'])
-        ->whereNumber('id')
-        ->name('guru.download-berkas');
+        Route::get('/guru/cetak-semua-pdf', [GuruController::class, 'cetakSemuaPDF'])
+            ->name('guru.cetak-semua');
 
+        Route::get('/guru/{id}/cetak-pdf', [GuruController::class, 'cetakPDF'])
+            ->whereNumber('id')
+            ->name('guru.cetak-pdf');
 
-    // ==================================================
-    // SISWA - CRUD ADMIN
-    // ==================================================
+        Route::get('/guru/{id}/download-berkas', [GuruController::class, 'downloadBerkas'])
+            ->whereNumber('id')
+            ->name('guru.download-berkas');
 
-    Route::get('/siswa/create', [SiswaController::class, 'create'])
-        ->name('siswa.create');
+// ==================================================
+            // SISWA - CRUD ADMIN
+            // ==================================================
 
-    Route::post('/siswa', [SiswaController::class, 'store'])
-        ->name('siswa.store');
+            Route::get('/siswa/create', [SiswaController::class, 'create'])
+                ->name('siswa.create');
 
-    Route::get('/siswa/{id}/edit', [SiswaController::class, 'edit'])
-        ->whereNumber('id')
-        ->name('siswa.edit');
+            Route::post('/siswa', [SiswaController::class, 'store'])
+                ->name('siswa.store');
 
-    Route::put('/siswa/{id}', [SiswaController::class, 'update'])
-        ->whereNumber('id')
-        ->name('siswa.update');
+            Route::get('/siswa/{id}/edit', [SiswaController::class, 'edit'])
+                ->whereNumber('id')
+                ->name('siswa.edit');
 
-    Route::delete('/siswa/{id}', [SiswaController::class, 'destroy'])
-        ->whereNumber('id')
-        ->name('siswa.destroy');
-});
+            Route::put('/siswa/{id}', [SiswaController::class, 'update'])
+                ->whereNumber('id')
+                ->name('siswa.update');
+
+            Route::delete('/siswa/{id}', [SiswaController::class, 'destroy'])
+                ->whereNumber('id')
+                ->name('siswa.destroy');
+        });
 
 
 // ======================================================
@@ -148,33 +154,32 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         ->name('siswa.cetak-semua');
 });
 
-// ======================================================
-// DATA GURU - ADMIN & GURU
-// HANYA MELIHAT DATA
-// ======================================================
+// // ======================================================
+// // DATA GURU - ADMIN & GURU
+// // HANYA MELIHAT DATA
+// // ======================================================
 
-Route::middleware(['auth', 'role:admin,guru'])->group(function () {
+// Route::middleware(['auth', 'role:admin,guru'])->group(function () {
 
-    // Daftar guru
-    Route::get('/guru', [GuruController::class, 'index'])
-        ->name('guru.index');
+//     // CRUD Guru
+//     Route::resource('guru', GuruController::class);
 
-    // Cetak semua guru
-    Route::get('/guru/cetak-semua-pdf', [GuruController::class, 'cetakSemuaPDF'])
-        ->name('guru.cetak-semua');
+//     // Buat akun login untuk guru
+//     Route::post('/guru/{id}/buat-akun', [GuruController::class, 'buatAkun'])
+//         ->whereNumber('id')
+//         ->name('guru.buat-akun');
 
-    // Cetak PDF satu guru
-    Route::get('/guru/{id}/cetak-pdf', [GuruController::class, 'cetakPDF'])
-        ->whereNumber('id')
-        ->name('guru.cetak-pdf');
+//     // Cetak semua guru
+//     Route::get('/guru/cetak-semua-pdf', [GuruController::class, 'cetakSemuaPDF'])
+//         ->name('guru.cetak-semua');
 
-    // Download berkas guru
-    Route::get('/guru/{id}/download-berkas', [GuruController::class, 'downloadBerkas'])
-        ->whereNumber('id')
-        ->name('guru.download-berkas');
+//     // Cetak PDF satu guru
+//     Route::get('/guru/{id}/cetak-pdf', [GuruController::class, 'cetakPDF'])
+//         ->whereNumber('id')
+//         ->name('guru.cetak-pdf');
 
-    // Detail guru
-    Route::get('/guru/{id}', [GuruController::class, 'show'])
-        ->whereNumber('id')
-        ->name('guru.show');
-});
+//     // Download berkas guru
+//     Route::get('/guru/{id}/download-berkas', [GuruController::class, 'downloadBerkas'])
+//         ->whereNumber('id')
+//         ->name('guru.download-berkas');
+// });
